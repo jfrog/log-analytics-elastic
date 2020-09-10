@@ -81,7 +81,11 @@ Setup passwords for elasticsearch using
 ```
 kubectl exec -it $(kubectl get pods | grep es-cluster-0 | sed -n 1p | awk '{print $1}') -- bin/elasticsearch-setup-passwords interactive
 ```
-Note the password given to elastic user
+Note the password given to elastic user and store the password in a secret
+
+```
+kubectl create secret generic elasticsearch-pw-elastic --from-literal password=<password>
+```
 
 Create Kibana configmap, service and deployment
 
