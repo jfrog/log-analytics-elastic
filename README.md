@@ -29,6 +29,40 @@ Elasticsearch kibana setup can be done using the following files or using manual
 
 Once we have deployed elasticsearch and kibana, we can access it via kibana web console. We can check for the running logging agents in Index Management section
 
+## Environment Configuration
+
+The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location.
+
+Helm based installs will already have this defined based upon the underlying docker images.
+
+For non-k8s based installations below is a reference to the Docker image locations per product. Note these locations may be different based upon the installation location chosen.
+
+````text
+Artifactory: 
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/
+````
+
+````text
+Xray:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/
+````
+
+````text
+Mision Control:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
+````
+
+````text
+Distribution:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/
+````
+
+````text
+Pipelines:
+export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/
+````
+
+
 ## FluentD Configuration
 
 Integration is done by specifying the host (elasticsearch - using the above files or ip address if using other coniguration), port (9200 by default)
