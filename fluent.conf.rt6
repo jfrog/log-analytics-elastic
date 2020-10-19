@@ -39,7 +39,7 @@
   tag jfrog.rt.artifactory.access
   <parse>
     @type regexp
-    expression /^(?<timestamp>[^ ]*) \[(?<trace_id>[^\]]*)\] \[(?<action_response>[^\]]*)\] (?<repo_path>.*) for client : (?<username>.+)/(?<ip>.+)$/
+    expression /^(?<timestamp>[^ ]*) \[(?<trace_id>[^\]]*)\] \[(?<action_response>[^\]]*)\] (?<repo_path>.*) for client : (?<username>.+)/(?<ip>.+).$/
   </parse>
 </source>
 
@@ -108,13 +108,6 @@
     flush_interval 5s
   </buffer>
 </match>
-<filter jfrog.rt.artifactory.access>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    ip ${(record["ip"].strip)[0..-2]}
-  </record>
-</filter>
 
 ########################
 # ELASTIC OUTPUT
