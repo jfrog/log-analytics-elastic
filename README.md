@@ -144,6 +144,13 @@ Creat an index pattern in the Management section and access the logs on the disc
 
 To access already existing visualizations and filters, import [export.ndjson](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/export.ndjson) to Saved objects in Management section
 
+###Dashboards
+
+* **Application** - This dashboard tracks Log Volume(information about different log sources) and Artifactory Errors over time(bursts of application errors that may otherwise go undetected)
+* **Audit** - This dashboard tracks audit logs help you determine who is accessing your Artifactory instance and from where. These can help you track potentially malicious requests or processes (such as CI jobs) using expired credentials.
+* **Docker** - This dashboard tracks dockerhub pull request changes (anonymous gets only 100 requests per 6 hours where as free account gets 200 requests per 6 hours)
+* **Requests** - This dashboard tracks HTTP response codes, Top 10 IP addresses for uploads and downloads
+
 ## Generating Data for Testing
 [Partner Integration Test Framework](https://github.com/jfrog/partner-integration-tests) can be used to generate data for metrics.
 
