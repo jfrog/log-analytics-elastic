@@ -28,74 +28,7 @@ Elasticsearch kibana setup can be done using the following files or using manual
 * [Kibana_deployment](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/kibana_deployment.yaml) - Kibana Deplpoyment
 * [Kibana_service](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/kibana_svc.yaml) - Kibana Service
 
-Once we have deployed elasticsearch and kibana, we can access it via kibana web console. We can check for the running logging agents in Index Management section
-
-## Environment Configuration
-
-The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location.
-
-Helm based installs will already have this defined based upon the underlying docker images.
-
-For non-k8s based installations below is a reference to the Docker image locations per product. Note these locations may be different based upon the installation location chosen.
-
-````text
-Artifactory: 
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/
-````
-
-````text
-Xray:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/
-````
-
-````text
-Mision Control:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
-````
-
-````text
-Distribution:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/
-````
-
-````text
-Pipelines:
-export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/
-````
-
-
-## FluentD Configuration
-
-Integration is done by specifying the host (elasticsearch - using the above files or ip address if using other coniguration), port (9200 by default)
-
-_index_name_ is the unique identifier based on which the index patterns can be created and filters can be applied on the log data
-
-When _logstash_format_ option is set to true, fluentd uses conventional index name format
-
-_type_name_ is fluentd by default and it specifies the type name to write to in the record and falls back to the default if a value is not given
-
-_include_tag_key_ defaults to false and it will add fluentd tag in the json record if set to true
-
-_user_ will be elastic by default
-
-_password_ will be the password specified for elastic user in elasticsearch authentication setup
-
-```
-<match jfrog.**>
-  @type elasticsearch
-  @id elasticsearch
-  host elasticsearch
-  port 9200
-  user "elastic"
-  password <password>
-  index_name unified-artifactory
-  include_tag_key true
-  type_name fluentd
-  logstash_format false
-</match>
-```
-
-## EFK Demo
+### Setup
 
 To run this integration start by creating elasticsearch configmap, service and statefulset
 
@@ -136,15 +69,121 @@ Wait for the deployment status using
 kubectl rollout status deployment/kibana
 ```
 
-This will create a Kibana web console which can be used using username as elastic and password as specified in the interactive authentication setup
+This will create a Kibana web console which can be accessed using username _elastic_ and password as specified in the interactive authentication setup
 
-Once the kibana is up, the host and port should be configured in td-agent.conf and td-agent can be started. This creates an index with the name specified in the conf file
+Once we have deployed elasticsearch and kibana, we can access it via kibana web console. We can check for the running logging agents in Index Management section
+
+## Environment Configuration
+
+The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location.
+
+Helm based installs will already have this defined based upon the underlying docker images.
+
+For non-k8s based installations below is a reference to the Docker image locations per product. Note these locations may be different based upon the installation location chosen.
+
+````text
+Artifactory: 
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/
+````
+
+````text
+Xray:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/
+````
+
+````text
+Mision Control:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
+````
+
+````text
+Distribution:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/
+````
+
+````text
+Pipelines:
+export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/
+````
+
+## Log Collector Requirement
+
+Fluentd is the supported log collector for this integration.
+
+Fluentd setup must be completed prior to Elastic-Kibana.
+
+For Fluentd setup information read the JFrog log analytic repository's [README.](https://github.com/jfrog/log-analytics/blob/master/README.md)
+
+
+### Configure Fluentd Elastic Output
+
+#### Download fluentd.conf
+Artifactory: 
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.rt
+````
+
+Xray:
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.xray
+````
+
+Mision Control:
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.missioncontrol
+````
+
+Distribution:
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.distribution
+````
+
+Pipelines:
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.pipelines
+````
+
+#### Configure fluentd.conf
+
+Integration is done by specifying the host (elasticsearch - using the above files or ip address if using other coniguration), port (9200 by default)
+
+_index_name_ is the unique identifier based on which the index patterns can be created and filters can be applied on the log data
+
+When _logstash_format_ option is set to true, fluentd uses conventional index name format
+
+_type_name_ is fluentd by default and it specifies the type name to write to in the record and falls back to the default if a value is not given
+
+_include_tag_key_ defaults to false and it will add fluentd tag in the json record if set to true
+
+_user_ will be elastic by default
+
+_password_ will be the password specified for elastic user in elasticsearch authentication setup
+
+These values override the last section of the `fluentd.conf` shown below:
+```
+<match jfrog.**>
+  @type elasticsearch
+  @id elasticsearch
+  host elasticsearch
+  port 9200
+  user "elastic"
+  password <password>
+  index_name unified-artifactory
+  include_tag_key true
+  type_name fluentd
+  logstash_format false
+</match>
+```
+Instructions to run fluentd configuration files can be found at JFrog log analytic repository's [README.](https://github.com/jfrog/log-analytics/blob/master/README.md)
+## Elastic-Kibana Setup
+
+Once the kibana is up, the host and port should be configured in fluent.conf and td-agent can be started. This creates an index with the name specified in the conf file
 
 Creat an index pattern in the Management section and access the logs on the discover tab
 
 To access already existing visualizations and filters, import [export.ndjson](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/export.ndjson) to Saved objects in Management section
 
-###Dashboards
+### Dashboards
 
 * **Application** - This dashboard tracks Log Volume(information about different log sources) and Artifactory Errors over time(bursts of application errors that may otherwise go undetected)
 * **Audit** - This dashboard tracks audit logs help you determine who is accessing your Artifactory instance and from where. These can help you track potentially malicious requests or processes (such as CI jobs) using expired credentials.
