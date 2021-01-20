@@ -235,10 +235,10 @@
 <match jfrog.**>
   @type elasticsearch
   @id elasticsearch
-  host elasticsearch
+  host my_host
   port 9200
-  user "elastic"
-  password <password>
+  user my_user
+  password my_password
   index_name unified-artifactory
   include_tag_key true
   type_name fluentd
