@@ -14,7 +14,7 @@ rabbitmq:
     password: guest
 common:
   customInitContainersBegin: |
-    - name: "prepare-fluentd-conf-on-persistent-volume"
+    - name: "download-fluentd-conf-on-persistent-volume"
       image: "{{ .Values.initContainerImage }}"
       imagePullPolicy: "{{ .Values.imagePullPolicy }}"
       command:
