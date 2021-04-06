@@ -289,10 +289,6 @@ To access already existing visualizations and filters, import [export.ndjson](ht
 * **Xray Violations** - This dashboard gives an aggregated snapshot of all the violations, watch policies, and the total number of infected artifacts and components within their environment. This information is also organized by watch, by policy, by type and by severity to provide deeper segmentation and analysis.
 
 
-### ECS Compatibility
-
-
-
 ## Demo Requirements
 
 * Kubernetes Cluster
