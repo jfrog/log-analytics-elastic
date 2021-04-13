@@ -205,6 +205,7 @@ wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent
 Xray:
 ````text
 wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.xray
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/siem/elastic_siem.conf
 ````
 
 Mision Control:
@@ -255,6 +256,21 @@ These values override the last section of the `fluentd.conf` shown below:
 ```
 Instructions to run fluentd configuration files can be found at JFrog log analytic repository's [README.](https://github.com/jfrog/log-analytics/blob/master/README.md)
 
+#### Configure splunk_siem.conf
+
+Integration is done by setting up Xray. Obtain JPD url and access token for API. Configure the source directive parameters specified below
+
+* **tag** (string) (required): The value is the tag assigned to the generated events.
+* **jpd_url** (string) (required): JPD url required to pull Xray SIEM violations
+* **access_token** (string) (required): [Access token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens) to authenticate Xray
+* **pos_file** (string) (required): Position file to record last SIEM violation pulled
+* **thread_count** (integer) (optional): Number of workers to process violation records in thread pool
+    * Default value: `5`
+* **wait_interval** (integer) (optional): Wait interval between pulling new events
+    * Default value: `60`
+    
+
+
 ## Elastic-Kibana Setup
 
 Once the kibana is up, the host and port should be configured in fluent.conf and td-agent can be started. This creates an index with the name specified in the conf file
@@ -269,6 +285,8 @@ To access already existing visualizations and filters, import [export.ndjson](ht
 * **Audit** - This dashboard tracks audit logs help you determine who is accessing your Artifactory instance and from where. These can help you track potentially malicious requests or processes (such as CI jobs) using expired credentials.
 * **Docker** - This dashboard tracks dockerhub pull request changes (anonymous gets only 100 requests per 6 hours where as free account gets 200 requests per 6 hours)
 * **Requests** - This dashboard tracks HTTP response codes, Top 10 IP addresses for uploads and downloads
+* **Xray Logs** - This dashboard tracks Log Volume, Xry Log Errors over time, HTTP 500 errors and Xray HTTP Response codes
+* **Xray Violations** - This dashboard gives an aggregated snapshot of all the violations, watch policies, and the total number of infected artifacts and components within their environment. This information is also organized by watch, by policy, by type and by severity to provide deeper segmentation and analysis.
 
 
 ## Demo Requirements
