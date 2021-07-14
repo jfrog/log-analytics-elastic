@@ -53,7 +53,7 @@
   port 9200
   user my_user
   password my_password
-  index_name unified-artifactory
+  index_name unified-nginx
   include_tag_key true
   type_name fluentd
   logstash_format false
