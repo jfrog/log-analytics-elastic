@@ -33,6 +33,11 @@ export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/
 ````
 
 ````text
+Nginx:
+export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/nginx/
+````
+
+````text
 Mision Control:
 export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
 ````
@@ -206,6 +211,11 @@ Xray:
 ````text
 wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.xray
 wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/siem/elastic_siem.conf
+````
+
+Nginx:
+````text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.nginx
 ````
 
 Mision Control:
