@@ -143,7 +143,7 @@ Then deploy the helm chart such as below:
 
 Artifactory ⎈:
 ```text
-helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
+helm upgrade --install artifactory  jfrog/artifactory \
        --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
        --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
        -f helm/artifactory-values.yaml
