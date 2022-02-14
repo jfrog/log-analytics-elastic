@@ -266,6 +266,16 @@ These values override the last section of the `fluentd.conf` shown below:
 ```
 Instructions to run fluentd configuration files can be found at JFrog log analytic repository's [README.](https://github.com/jfrog/log-analytics/blob/master/README.md)
 
+Authenticate with the Artifactory API by replacing `<TOKEN>` with your bearer token in the downloaded `fluent.conf.rt` file.
+There should be two spots listed below:
+
+```
+command "curl --request GET 'http://localhost:8081/artifactory/api/system/version' -H 'Authorization: Bearer <TOKEN>'"
+headers {"Authorization":"Bearer <TOKEN>"}
+```
+
+For information on authentication with a bearer token with artifactory, please visit [Bearer Token Authentication](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens)
+
 #### Configure splunk_siem.conf
 
 Integration is done by setting up Xray. Obtain JPD url and access token for API. Configure the source directive parameters specified below
