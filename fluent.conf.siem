@@ -4,7 +4,7 @@
   jpd_url "#{ENV['JF_JPD_URL']}"
   username "#{ENV['JF_JPD_USER_NAME']}"
   apikey "#{ENV['JF_JPD_API_KEY']}"
-  pos_file "#{ENV['JF_STATE_FOLDER']}/elastic_pos.txt"
+  pos_file_path "#{ENV['JF_STATE_FOLDER']}/elastic_pos.txt"
 </source>
 <filter test*>
   @type record_transformer
