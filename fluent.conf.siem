@@ -2,7 +2,8 @@
   @type jfrog_siem
   tag test_tag
   jpd_url "#{ENV['JF_JPD_URL']}"
-  access_token "#{ENV['JF_ACCESS_TOKEN']}"
+  username "#{ENV['JF_JPD_USER_NAME']}"
+  apikey "#{ENV['JF_JPD_API_KEY']}"
   pos_file "#{ENV['JF_STATE_FOLDER']}/elastic_pos.txt"
 </source>
 <filter test*>
