@@ -229,16 +229,50 @@
     </record>
 </filter>
 
+###JFROG METRICS Plugin
+<source>
+  @type jfrog_metrics
+  @id metrics_http_jfrt
+  tag jfrog.metrics.artifactory
+  interval 5s
+  metric_prefix 'jfrog.artifactory'
+  jpd_url "#{ENV['JF_JPD_URL']}"
+  username "#{ENV['JF_JPD_USER_NAME']}"
+  apikey "#{ENV['JF_JPD_API_KEY']}"
+</source>
+
+
 ########################
-# ELASTIC OUTPUT
+# ELASTIC OUTPUT METRICS
+########################
+<match jfrog.metrics.**>
+  @type elasticsearch
+  @id elasticsearch_metrics
+  host "#{ENV['ELASTIC_HOST']}"
+  port "#{ENV['ELASTIC_PORT']}"
+  user "#{ENV['ELASTIC_USER']}"
+  password "#{ENV['ELASTIC_PASSWORD']}"
+  scheme "#{ENV['ELASTIC_SCHEME']}"
+  ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
+  index_name unified-artifactory-metrics
+  include_tag_key true
+  type_name fluentd
+  logstash_format false
+</match>
+#END ELASTIC OUTPUT
+
+########################
+# ELASTIC OUTPUT LOGS
 ########################
 <match jfrog.**>
   @type elasticsearch
-  @id elasticsearch
-  host my_host
-  port 9200
-  user my_user
-  password my_password
+  @id elasticsearch_logs
+  host "#{ENV['ELASTIC_HOST']}"
+  port "#{ENV['ELASTIC_PORT']}"
+  user "#{ENV['ELASTIC_USER']}"
+  password "#{ENV['ELASTIC_PASSWORD']}"
+  scheme "#{ENV['ELASTIC_SCHEME']}"
+  ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
   index_name unified-artifactory
   include_tag_key true
   type_name fluentd
