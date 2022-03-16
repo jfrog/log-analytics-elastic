@@ -131,6 +131,7 @@
   password "#{ENV['ELASTIC_PASSWORD']}"
   scheme "#{ENV['ELASTIC_SCHEME']}"
   ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
+  target_platform "ELASTIC"
   index_name unified-xray-metrics
   include_tag_key true
   type_name fluentd
