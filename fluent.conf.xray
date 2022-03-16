@@ -136,6 +136,7 @@
   include_tag_key true
   type_name fluentd
   logstash_format false
+  include_timestamp true
 </match>
 #END ELASTIC OUTPUT
 
