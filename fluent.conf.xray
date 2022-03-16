@@ -146,10 +146,12 @@
 <match jfrog.**>
   @type elasticsearch
   @id elasticsearch
-  host my_host
-  port 9200
-  user my_user
-  password my_password
+  host "#{ENV['ELASTIC_HOST']}"
+  port "#{ENV['ELASTIC_PORT']}"
+  user "#{ENV['ELASTIC_USER']}"
+  password "#{ENV['ELASTIC_PASSWORD']}"
+  scheme "#{ENV['ELASTIC_SCHEME']}"
+  ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
   index_name unified-xray
   include_tag_key true
   type_name fluentd
