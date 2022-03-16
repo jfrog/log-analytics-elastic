@@ -116,6 +116,7 @@
   jpd_url "#{ENV['JF_JPD_URL']}"
   username "#{ENV['JF_JPD_USER_NAME']}"
   apikey "#{ENV['JF_JPD_API_KEY']}"
+  target_platform "ELASTIC"
 </source>
 
 
@@ -131,7 +132,6 @@
   password "#{ENV['ELASTIC_PASSWORD']}"
   scheme "#{ENV['ELASTIC_SCHEME']}"
   ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
-  target_platform "ELASTIC"
   index_name unified-xray-metrics
   include_tag_key true
   type_name fluentd
