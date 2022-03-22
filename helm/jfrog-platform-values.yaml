@@ -44,6 +44,8 @@ artifactory:
             value: "{{ .Values.global.jfrog.observability.metrics.username }}"
           - name: JF_JPD_API_KEY
             value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+          - name: JF_JPD_TOKEN
+            value: "{{ .Values.global.jfrog.observability.metrics.token }}"
           - name: ELASTIC_HOST
             value: "{{ .Values.global.elastic.host }}"
           - name: ELASTIC_PORT
@@ -84,6 +86,8 @@ xray:
             value: "{{ .Values.global.jfrog.observability.metrics.username }}"
           - name: JF_JPD_API_KEY
             value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+          - name: JF_JPD_TOKEN
+            value: "{{ .Values.global.jfrog.observability.metrics.token }}"
           - name: ELASTIC_HOST
             value: "{{ .Values.global.elastic.host }}"
           - name: ELASTIC_PORT
@@ -167,6 +171,8 @@ xray:
                   value: "{{ .Values.global.jfrog.observability.metrics.username }}"
                 - name: JF_JPD_API_KEY
                   value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+                - name: JF_JPD_TOKEN
+                  value: "{{ .Values.global.jfrog.observability.metrics.token }}"
                 - name: ELASTIC_HOST
                   value: "{{ .Values.global.elastic.host }}"
                 - name: ELASTIC_PORT

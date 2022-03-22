@@ -116,6 +116,7 @@
   jpd_url "#{ENV['JF_JPD_URL']}"
   username "#{ENV['JF_JPD_USER_NAME']}"
   apikey "#{ENV['JF_JPD_API_KEY']}"
+  token "#{ENV['JF_JPD_TOKEN']}"
   target_platform "ELASTIC"
 </source>
 
