@@ -255,7 +255,7 @@
   password "#{ENV['ELASTIC_PASSWORD']}"
   scheme "#{ENV['ELASTIC_SCHEME']}"
   ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
-  index_name unified-artifactory-metrics
+  index_name unified-metrics-artifactory
   include_tag_key true
   type_name fluentd
   logstash_format false

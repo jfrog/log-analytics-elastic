@@ -132,7 +132,7 @@
   password "#{ENV['ELASTIC_PASSWORD']}"
   scheme "#{ENV['ELASTIC_SCHEME']}"
   ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
-  index_name unified-xray-metrics
+  index_name unified-metrics-xray
   include_tag_key true
   type_name fluentd
   logstash_format false
