@@ -22,14 +22,12 @@ artifactory:
       enabled: true
     customSidecarContainers: |
       - name: "artifactory-fluentd-sidecar"
-        image: "bitnami/fluentd:latest"
+        image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
         imagePullPolicy: "IfNotPresent"
         command:
           - 'sh'
           - '-c'
           - >
-            fluent-gem install fluent-plugin-jfrog-metrics;
-            fluent-gem install fluent-plugin-elasticsearch;
             curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/PTRENG-3355/fluent.conf.rt -o fluentd.conf;
             fluentd -v -c fluentd.conf
         volumeMounts:
@@ -64,14 +62,12 @@ xray:
   common:
     customSidecarContainers: |
       - name: "xray-fluentd-sidecar"
-        image: "bitnami/fluentd:latest"
+        image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
         imagePullPolicy: "IfNotPresent"
         command:
           - 'sh'
           - '-c'
           - >
-            fluent-gem install fluent-plugin-jfrog-metrics;
-            fluent-gem install fluent-plugin-elasticsearch;
             curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/PTRENG-3355/fluent.conf.xray -o fluentd.conf;
             fluentd -v -c fluentd.conf
         volumeMounts:
@@ -151,14 +147,12 @@ xray:
         spec:
           containers:
             - name: jfrog-siem-fluentd
-              image: "bitnami/fluentd:latest"
+              image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
               imagePullPolicy: "IfNotPresent"
               command:
                 - "sh"
                 - "-c"
                 - >
-                  fluent-gem install fluent-plugin-jfrog-siem;
-                  fluent-gem install fluent-plugin-elasticsearch;
                   curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/PTRENG-3355/fluent.conf.siem -o fluentd.conf;
                   fluentd -v -c fluentd.conf
               volumeMounts:

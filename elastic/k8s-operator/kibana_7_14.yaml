@@ -1,0 +1,22 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: elastic-7-14
+spec:
+  version: 7.14.0
+  count: 1
+  http:
+    service:
+      spec:
+        type: LoadBalancer
+        ports:
+          - name: http
+            protocol: TCP
+            port: 80
+            targetPort: 5601
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  elasticsearchRef:
+    name: elasticsearch

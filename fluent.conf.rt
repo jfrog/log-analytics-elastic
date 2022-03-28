@@ -241,6 +241,7 @@
   apikey "#{ENV['JF_JPD_API_KEY']}"
   token "#{ENV['JF_JPD_TOKEN']}"
   target_platform "ELASTIC"
+  common_jpd true
 </source>
 
 
