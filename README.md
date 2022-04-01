@@ -14,6 +14,17 @@ The following describes how to configure Elastic and Kibana to gather metrics fr
 | 0.2.0   | 7.7.3       | 3.8.0  | N/A          | N/A             | N/A       |
 | 0.1.1   | 7.6.3       | 3.6.2  | N/A          | N/A             | N/A       |
 
+1. [Elastic Setup](#elastic-setup)
+2. [Environment Configuration](#environment-configuration)
+3. [Fluentd Installation](#fluentd-installation)
+   - [OS / Virtual Machine](#os--virtual-machine)
+   - [Docker](#docker)
+   - [Kubernetes Deployment with Helm](#kubernetes-deployment-with-helm)
+4. [Fluentd Configuration for Elastic](#fluentd-configuration-for-elastic)
+5. [Dashboards](#dashboards)
+6. [Splunk Demo](#splunk-demo)
+7. [References](#references)
+
 ## Elastic Setup
 
 Install the `JFrog Platform` integration
@@ -131,6 +142,31 @@ Configure `fluent.conf.*` according to the instructions mentioned in [Fluentd Co
 ./fluentd $JF_PRODUCT_DATA_INTERNAL/fluent.conf.<product_name>
 ```
 
+### Docker
+
+In order to run fluentd as a docker image to send the log, siem and metrics data to elastic, the following commands needs to be executed on the host that runs the docker.
+Change the fluentd config file based on the which component the metrics is collected.
+
+command example
+
+```text
+docker run \
+    -e JF_PRODUCT_DATA_INTERNAL='/opt/jfrog/artifactory/var/' \
+    -e JF_JPD_URL='http://localhost:8082' \
+    -e JF_JPD_USER_NAME='admin' \
+    -e JF_JPD_API_KEY='<API_KEY>' \
+    -e JF_JPD_TOKEN='<JPD_ADMIN_TOKEN>' \
+    -e ELASTIC_HOST='localhost' \
+    -e ELASTIC_PORT='9200' \
+    -e ELASTIC_USER='elastic' \
+    -e ELASTIC_PASSWORD='changeme' \
+    -e ELASTIC_SCHEME='http' \
+    -e ELASTIC_SSL_VERIFY='false' \
+    --entrypoint '/bin/sh' partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0 \
+    -c 'curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.rt -o fluentd.conf; fluentd -v -c fluentd.conf'
+
+```
+
 ### Kubernetes Deployment with Helm
 
 Recommended installation for Kubernetes is to utilize the helm chart with the associated values.yaml in this repo.
@@ -239,31 +275,14 @@ helm upgrade --install xray jfrog/xray \
        --set global.jfrog.observability.branch=master
 ```
 
-### Configuration steps for Nginx
+## Fluentd Configuration for Elastic
 
-Download the Nginx fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
+All the dynamic configuration for fluentd is picked from environment variable for xray and artifactory.
 
-```text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.nginx
-```
+### Fluentd configs:
 
-Override the match directive(last section) of the downloaded `fluent.conf.nginx` with the details given below
-
-```
-<match jfrog.**>
-  @type elasticsearch
-  @id elasticsearch
-  host my_host
-  port 9200
-  user my_user
-  password my_password
-  index_name unified-nginx
-  include_tag_key true
-  type_name fluentd
-  logstash_format false
-</match>
-```
+- **Artifactory** - https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.rt
+- **Xray** - https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.xray
 
 ## Dashboards
 
@@ -275,6 +294,8 @@ Override the match directive(last section) of the downloaded `fluent.conf.nginx`
 - **Requests** - This dashboard tracks HTTP response codes, Top 10 IP addresses for uploads and downloads
 - **Xray Logs** - This dashboard tracks Log Volume, Xry Log Errors over time, HTTP 500 errors and Xray HTTP Response codes
 - **Xray Violations** - This dashboard gives an aggregated snapshot of all the violations, watch policies, and the total number of infected artifacts and components within their environment. This information is also organized by watch, by policy, by type and by severity to provide deeper segmentation and analysis.
+
+## Elastic Demo
 
 # Demo Requirements
 
