@@ -94,6 +94,8 @@ export ELASTIC_SCHEME=https
 export ELASTIC_SSL_VERIFY=true
 ```
 
+For information on authentication with a bearer token with artifactory, please visit [Bearer Token Authentication](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens)
+
 ## Fluentd Installation
 
 ### OS / Virtual Machine

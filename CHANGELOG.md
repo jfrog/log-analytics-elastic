@@ -1,6 +1,9 @@
 # JFrog Log Analytics Changelog
 All changes to the log analytics integration will be documented in this file.
 
+## [0.9.0] - Feb 14, 2022
+* Adding call home configuration to the artifactory fluent configuration.
+
 ## [0.8.0] - Oct 29, 2020
 * Adding docker dashboard and enhancing existing dashboard widgets
 
