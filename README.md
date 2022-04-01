@@ -277,6 +277,29 @@ helm upgrade --install xray jfrog/xray \
        --set global.jfrog.observability.branch=master
 ```
 
+Jfrog Platform ⎈:
+
+Update the following fields in `/helm/jfrog-platform-values.yaml`:
+
+Replace required parameters below:
+
+```text
+helm upgrade --install jfrog-platform jfrog/jfrog-platform \
+       -f helm/jfrog-platform-values.yaml \
+       --set global.elastic.host=elasticsearch-es-http.elastic.svc.cluster.local \
+       --set global.elastic.port=9200 \
+       --set global.elastic.user=elastic \
+       --set global.elastic.password=changeme \
+       --set global.elastic.scheme=https \
+       --set global.elastic.ssl_verify=false \
+       --set global.jfrog.observability.metrics.jpd_url=http://localhost:8082 \
+       --set global.jfrog.observability.metrics.jpd_url_nginx=http://jfrog-platform-artifactory-nginx \
+       --set global.jfrog.observability.metrics.username=admin \
+       --set global.jfrog.observability.metrics.apikey=<API_KEY> \
+       --set global.jfrog.observability.metrics.token=<JPD_ADMIN_TOKEN> \
+       --set global.jfrog.observability.branch=master
+```
+
 ## Fluentd Configuration for Elastic
 
 All the dynamic configuration for fluentd is picked from environment variable for xray and artifactory.
