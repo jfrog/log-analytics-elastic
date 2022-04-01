@@ -14,24 +14,7 @@ The following describes how to configure Elastic and Kibana to gather metrics fr
 | 0.2.0   | 7.7.3       | 3.8.0  | N/A          | N/A             | N/A       |
 | 0.1.1   | 7.6.3       | 3.6.2  | N/A          | N/A             | N/A       |
 
-## Elastic Setup
-
-Install the `JFrog Platform` integration
-
-```text
-1. In Kibana, go to Management > Integrations > Browse integrations. Search for "JFrog Platform" and select an integration
-2. Click the Settings tab.
-3. Click Install <integration> assets to set up the Kibana and Elasticsearch assets.
-```
-
-Installing all kibana assests directly instead of integration.
-To access already existing visualizations and filters, import [kibana_dashboard_v1.ndjson](https://github.com/jfrog/log-analytics-elastic/blob/master/kibana/kibana_dashboard_v1.ndjson) to Saved objects in Management section
-
-`Note! Only elastic verion 7.14 and above is supported`
-
 ## Environment Configuration
-
-We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you set the JF_PRODUCT_DATA_INTERNAL environment variable to the correct path for your product
 
 The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location.
 
@@ -55,7 +38,7 @@ export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/nginx/
 ```
 
 ```text
-Mission Control:
+Mision Control:
 export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
 ```
 
@@ -69,205 +52,271 @@ Pipelines:
 export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/
 ```
 
-```text
-Common:
-export JF_JPD_URL=http://localhost:8082
-export JF_JPD_USER_NAME=admin
-export JF_JPD_API_KEY=<API_KEY>
-export JF_JPD_TOKEN=<JPD_ADMIN_TOKEN>
-export ELASTIC_HOST=elasticsearch-es-http.elastic.svc.cluster.local
-export ELASTIC_PORT=9200
-export ELASTIC_USER=elastic
-export ELASTIC_PASSWORD=changeme
-export ELASTIC_SCHEME=https
-export ELASTIC_SSL_VERIFY=true
-```
-
-## Fluentd Installation
+## Fluentd Install
 
 ### OS / Virtual Machine
 
-Ensure you have access to the Internet from VM. Recommended install is through fluentd's native OS based package installs:
+Recommended install is through fluentd's native OS based package installs:
 
-| OS              | Package Manager     | Link                                                 |
-| --------------- | ------------------- | ---------------------------------------------------- |
-| CentOS/RHEL     | Linux - RPM (YUM)   | https://docs.fluentd.org/installation/install-by-rpm |
-| Debian/Ubuntu   | Linux - APT         | https://docs.fluentd.org/installation/install-by-deb |
-| MacOS/Darwin    | MacOS - DMG         | https://docs.fluentd.org/installation/install-by-dmg |
-| Windows         | Windows - MSI       | https://docs.fluentd.org/installation/install-by-msi |
-| Gem Install\*\* | MacOS & Linux - Gem | https://docs.fluentd.org/installation/install-by-gem |
+| OS            | Package Manager | Link                                                 |
+| ------------- | --------------- | ---------------------------------------------------- |
+| CentOS/RHEL   | RPM (YUM)       | https://docs.fluentd.org/installation/install-by-rpm |
+| Debian/Ubuntu | APT             | https://docs.fluentd.org/installation/install-by-deb |
+| MacOS/Darwin  | DMG             | https://docs.fluentd.org/installation/install-by-dmg |
+| Windows       | MSI             | https://docs.fluentd.org/installation/install-by-msi |
 
-```text
-** For Gem based install, Ruby Interpreter has to be setup first, following is the recommended process to install Ruby
+User installs can utilize the zip installer for Linux
 
-1. Install Ruby Version Manager (RVM) as described in https://rvm.io/rvm/install#installation-explained, ensure to follow all the onscreen instructions provided to complete the rvm installation
-	* For installation across users a SUDO based install is recommended, the installation is as described in https://rvm.io/support/troubleshooting#sudo
+| OS             | Package Manager | Link                                                                                                   |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| Linux (x86_64) | ZIP             | https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz |
 
-2. Once rvm installation is complete, verify the RVM installation executing the command 'rvm -v'
-
-3. Now install ruby v2.7.0 or above executing the command 'rvm install <ver_num>', ex: 'rvm install 2.7.5'
-
-4. Verify the ruby installation, execute 'ruby -v', gem installation 'gem -v' and 'bundler -v' to ensure all the components are intact
-
-5. Post completion of Ruby, Gems installation, the environment is ready to further install new gems, execute the following gem install commands one after other to setup the needed ecosystem
-
-	'gem install fluentd'
-
-```
-
-After FluentD is successfully installed, the below plugins are required to be installed
+Download it to a directory the user has permissions to write such as the `$JF_PRODUCT_DATA_INTERNAL` locations discussed above:
 
 ```text
-
-	'gem install fluent-plugin-elasticsearch'
-	'gem install fluent-plugin-jfrog-siem'
-	'gem install fluent-plugin-jfrog-metrics'
-
+cd $JF_PRODUCT_DATA_INTERNAL
+wget https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz
 ```
 
-Configure `fluent.conf.*` according to the instructions mentioned in [Fluentd Configuration for Elastic](#fluentd-configuration-for-elastic) section and then run the fluentd wrapper with one argument pointed to the `fluent.conf.*` file configured.
+Untar to create the folder:
 
 ```text
-./fluentd $JF_PRODUCT_DATA_INTERNAL/fluent.conf.<product_name>
+tar -xvf fluentd-1.11.0-linux-x86_64.tar.gz
 ```
 
-### Kubernetes Deployment with Helm
+Move into the new folder:
 
-Recommended installation for Kubernetes is to utilize the helm chart with the associated values.yaml in this repo.
+```text
+cd fluentd-1.11.0-linux-x86_64
+```
+
+Run the fluentd wrapper with one argument pointed to the configuration file to load:
+
+```text
+./fluentd test.conf
+```
+
+Next steps are to setup a `fluentd.conf` file using the relevant integrations for Splunk, DataDog, Elastic, or Prometheus.
+
+### Docker
+
+Recommended install for Docker is to utilize the zip installer for Linux
+
+| OS             | Package Manager | Link                                                                                                   |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| Linux (x86_64) | ZIP             | https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz |
+
+Download it to a directory the user has permissions to write such as the `$JF_PRODUCT_DATA_INTERNAL` locations discussed above:
+
+```text
+cd $JF_PRODUCT_DATA_INTERNAL
+wget https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz
+```
+
+Untar to create the folder:
+
+```text
+tar -xvf fluentd-1.11.0-linux-x86_64.tar.gz
+```
+
+Move into the new folder:
+
+```text
+cd fluentd-1.11.0-linux-x86_64
+```
+
+Run the fluentd wrapper with one argument pointed to the configuration file to load:
+
+```text
+./fluentd test.conf
+```
+
+Next steps are to setup a `fluentd.conf` file using the relevant configuration files for Elastic.
+
+### Kubernetes
+
+Recommended install for Kubernetes is to utilize the helm chart with the associated values.yaml in this repo.
 
 | Product        | Example Values File             |
 | -------------- | ------------------------------- |
 | Artifactory    | helm/artifactory-values.yaml    |
 | Artifactory HA | helm/artifactory-ha-values.yaml |
 | Xray           | helm/xray-values.yaml           |
-| JFrog Platform | helm/jfrog-platform-values.yaml |
 
-Update the values.yaml associated to the product you want to deploy with your elastic settings.
+Update the values.yaml associated to the product you want to deploy with your Elastic settings.
 
-Then deploy the helm chart as described below:
-
-Add JFrog Helm repository:
-
-```text
-helm repo add jfrog https://charts.jfrog.io
-helm repo update
-```
-
-Replace placeholders with your `masterKey` and `joinKey`. To generate each of them, use the command
-`openssl rand -hex 32`
+Then deploy the helm chart such as below:
 
 Artifactory ⎈:
 
-Replace the required parameters below:
-
 ```text
 helm upgrade --install artifactory  jfrog/artifactory \
-       -f helm/artifactory-values.yaml \
        --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
        --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
-       --set global.elastic.host=<ELASTIC_CLUSTER_URL> \
-       --set global.elastic.port=9200 \
-       --set global.elastic.user=elastic \
-       --set global.elastic.password=password \
-       --set global.elastic.scheme=https \
-       --set global.elastic.ssl_verify=true \
-       --set global.jfrog.observability.metrics.jpd_url=http://localhost:8082 \
-       --set global.jfrog.observability.metrics.jpd_url_nginx=http://jfrog-platform-artifactory-nginx \
-       --set global.jfrog.observability.metrics.username=admin \
-       --set global.jfrog.observability.metrics.apikey=<API_KEY> \
-       --set global.jfrog.observability.metrics.token=<JPD_ADMIN_TOKEN> \
-       --set global.jfrog.observability.branch=master
+       -f helm/artifactory-values.yaml
 ```
 
 Artifactory-HA ⎈:
 
-For HA installation, please create a license secret on your cluster prior to installation.
-
-```text
-kubectl create secret generic artifactory-license --from-file=<path_to_license_file>artifactory.cluster.license
-```
-
-Note: Replace placeholders with your `masterKey` and `joinKey`. To generate each of them, use the command
-`openssl rand -hex 32`
-
-Replace required values below:
-
 ```text
 helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
-       -f helm/artifactory-ha-values.yaml
        --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
        --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
-       --set global.elastic.host=<ELASTIC_CLUSTER_URL> \
-       --set global.elastic.port=9200 \
-       --set global.elastic.user=elastic \
-       --set global.elastic.password=password \
-       --set global.elastic.scheme=https \
-       --set global.elastic.ssl_verify=true \
-       --set global.jfrog.observability.metrics.jpd_url=http://localhost:8082 \
-       --set global.jfrog.observability.metrics.jpd_url_nginx=http://jfrog-platform-artifactory-nginx \
-       --set global.jfrog.observability.metrics.username=admin \
-       --set global.jfrog.observability.metrics.apikey=<API_KEY> \
-       --set global.jfrog.observability.metrics.token=<JPD_ADMIN_TOKEN> \
-       --set global.jfrog.observability.branch=master
+       -f helm/artifactory-ha-values.yaml
 ```
 
 Xray ⎈:
 
-Update the following fields in `/helm/xray-values.yaml`:
-
-Use the same `joinKey` as you used in Artifactory installation to allow Xray node to successfully connect to Artifactory.
-
-Replace required parameters below:
-
 ```text
-helm upgrade --install xray jfrog/xray \
+helm upgrade --install xray jfrog/xray --set xray.jfrogUrl=http://my-artifactory-nginx-url \
+       --set xray.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+       --set xray.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
        -f helm/xray-values.yaml
-       --set xray.jfrogUrl=http://my-artifactory-nginx-url \
-       --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
-       --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
-       --set global.elastic.host=<ELASTIC_CLUSTER_URL> \
-       --set global.elastic.port=9200 \
-       --set global.elastic.user=elastic \
-       --set global.elastic.password=password \
-       --set global.elastic.scheme=https \
-       --set global.elastic.ssl_verify=true \
-       --set global.jfrog.observability.metrics.jpd_url=http://localhost:8082 \
-       --set global.jfrog.observability.metrics.jpd_url_nginx=http://my-artifactory-nginx-url \
-       --set global.jfrog.observability.metrics.username=admin \
-       --set global.jfrog.observability.metrics.apikey=<API_KEY> \
-       --set global.jfrog.observability.metrics.token=<JPD_ADMIN_TOKEN> \
-       --set global.jfrog.observability.branch=master
 ```
 
-### Configuration steps for Nginx
+#### Kubernetes Deployment without Helm
 
-Download the Nginx fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
+To modify existing Kubernetes based deployments without using Helm users can use the zip installer for Linux:
+
+| OS             | Package Manager | Link                                                                                                   |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| Linux (x86_64) | ZIP             | https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz |
+
+Download it to a directory the user has permissions to write such as the `$JF_PRODUCT_DATA_INTERNAL` locations discussed above:
 
 ```text
 cd $JF_PRODUCT_DATA_INTERNAL
+wget https://github.com/jfrog/log-analytics/raw/master/fluentd-installer/fluentd-1.11.0-linux-x86_64.tar.gz
+```
+
+Untar to create the folder:
+
+```text
+tar -xvf fluentd-1.11.0-linux-x86_64.tar.gz
+```
+
+Move into the new folder:
+
+```text
+cd fluentd-1.11.0-linux-x86_64
+```
+
+Run the fluentd wrapper with one argument pointed to the configuration file to load:
+
+```text
+./fluentd test.conf
+```
+
+Next steps are to setup a `fluentd.conf` file using the relevant configuration files for Elastic.
+
+### Fluentd Configuration for Elastic
+
+#### Download fluentd.conf
+
+Artifactory:
+
+```text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.rt
+```
+
+Xray:
+
+```text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.xray
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/siem/elastic_siem.conf
+```
+
+Nginx:
+
+```text
 wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.nginx
 ```
 
-Override the match directive(last section) of the downloaded `fluent.conf.nginx` with the details given below
+Mision Control:
+
+```text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.missioncontrol
+```
+
+Distribution:
+
+```text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.distribution
+```
+
+Pipelines:
+
+```text
+wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.pipelines
+```
+
+#### Configure fluentd.conf
+
+Integration is done by specifying the host (elasticsearch - using the above files or ip address if using other coniguration), port (9200 by default)
+
+_index_name_ is the unique identifier based on which the index patterns can be created and filters can be applied on the log data
+
+When _logstash_format_ option is set to true, fluentd uses conventional index name format
+
+_type_name_ is fluentd by default and it specifies the type name to write to in the record and falls back to the default if a value is not given
+
+_include_tag_key_ defaults to false and it will add fluentd tag in the json record if set to true
+
+_user_ will be elastic by default
+
+_password_ will be the password specified for elastic user in elasticsearch authentication setup
+
+These values override the last section of the `fluentd.conf` shown below:
 
 ```
 <match jfrog.**>
   @type elasticsearch
   @id elasticsearch
-  host my_host
+  host elasticsearch
   port 9200
-  user my_user
-  password my_password
-  index_name unified-nginx
+  user "elastic"
+  password <password>
+  index_name unified-artifactory
   include_tag_key true
   type_name fluentd
   logstash_format false
 </match>
 ```
 
-## Dashboards
+Instructions to run fluentd configuration files can be found at JFrog log analytic repository's [README.](https://github.com/jfrog/log-analytics/blob/master/README.md)
 
-### Artifactory dashboard
+Authenticate with the Artifactory API by replacing `<TOKEN>` with your bearer token in the downloaded `fluent.conf.rt` file.
+There should be two spots listed below:
+
+```
+command "curl --request GET 'http://localhost:8081/artifactory/api/system/version' -H 'Authorization: Bearer <TOKEN>'"
+headers {"Authorization":"Bearer <TOKEN>"}
+```
+
+For information on authentication with a bearer token with artifactory, please visit [Bearer Token Authentication](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens)
+
+#### Configure splunk_siem.conf
+
+Integration is done by setting up Xray. Obtain JPD url and access token for API. Configure the source directive parameters specified below
+
+- **tag** (string) (required): The value is the tag assigned to the generated events.
+- **jpd_url** (string) (required): JPD url required to pull Xray SIEM violations
+- **access_token** (string) (required): [Access token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens) to authenticate Xray
+- **pos_file** (string) (required): Position file to record last SIEM violation pulled
+- **thread_count** (integer) (optional): Number of workers to process violation records in thread pool
+  - Default value: `5`
+- **wait_interval** (integer) (optional): Wait interval between pulling new events
+  - Default value: `60`
+
+## Elastic-Kibana Setup
+
+Once the kibana is up, the host and port should be configured in fluent.conf and td-agent can be started. This creates an index with the name specified in the conf file
+
+Creat an index pattern in the Management section and access the logs on the discover tab
+
+To access already existing visualizations and filters, import [export.ndjson](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/export.ndjson) to Saved objects in Management section
+
+### Dashboards
 
 - **Application** - This dashboard tracks Log Volume(information about different log sources) and Artifactory Errors over time(bursts of application errors that may otherwise go undetected)
 - **Audit** - This dashboard tracks audit logs help you determine who is accessing your Artifactory instance and from where. These can help you track potentially malicious requests or processes (such as CI jobs) using expired credentials.
@@ -276,7 +325,7 @@ Override the match directive(last section) of the downloaded `fluent.conf.nginx`
 - **Xray Logs** - This dashboard tracks Log Volume, Xry Log Errors over time, HTTP 500 errors and Xray HTTP Response codes
 - **Xray Violations** - This dashboard gives an aggregated snapshot of all the violations, watch policies, and the total number of infected artifacts and components within their environment. This information is also organized by watch, by policy, by type and by severity to provide deeper segmentation and analysis.
 
-# Demo Requirements
+## Demo Requirements
 
 - Kubernetes Cluster
 - Artifactory and/or Xray installed via [JFrog Helm Charts](https://github.com/jfrog/charts)
@@ -286,19 +335,62 @@ Override the match directive(last section) of the downloaded `fluent.conf.nginx`
 
 Elasticsearch kibana setup can be done using the following files or using manual configuration
 
-Install ECK operator following https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-quickstart.html
-
-- [Elasticserach Cluster](https://github.com/jfrog/log-analytics-elastic/blob/master/elastic/k8s-operator/elasticsearch_cluster.yaml) - Elasticsearch Cluster
-- [Kibana](https://github.com/jfrog/log-analytics-elastic/blob/master/elastic/k8s-operator/kibana.yaml) - Kibana
+- [Elastic_configmap](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/elasticsearch_configmap.yaml) - Elasticsearch ConfigMap
+- [Elastic_statefulset](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/elasticsearch_statefulset.yaml) - Elasticsearch Statefulset
+- [Elastic_service](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/elasticsearch_svc.yaml) - Elasticsearch Service
+- [Kibana_configmap](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/kibana_configmap.yaml) - Kibana ConfigMap
+- [Kibana_deployment](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/kibana_deployment.yaml) - Kibana Deplpoyment
+- [Kibana_service](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/kibana_svc.yaml) - Kibana Service
 
 ### Setup
 
-To run this integration start by creating elasticsearch and kibana
+To run this integration start by creating elasticsearch configmap, service and statefulset
 
 ```
-kubectl create -f elastic/k8s-operator/elasticsearch_cluster.yaml
-kubectl create -f elastic/k8s-operator/kibana.yaml
+kubectl create -f elastic/elasticsearch_configmap.yaml
+kubectl create -f elastic/elasticsearch_svc.yaml
+kubectl create -f elastic/elasticsearch_statefulset.yaml
 ```
+
+Check for the status of the statefulset using
+
+```
+kubectl rollout status sts/es-cluster
+```
+
+Setup passwords for elasticsearch using
+
+```
+kubectl exec -it $(kubectl get pods | grep es-cluster-0 | sed -n 1p | awk '{print $1}') -- bin/elasticsearch-setup-passwords interactive
+```
+
+Note the password given to elastic user and store the password in a secret
+
+```
+kubectl create secret generic elasticsearch-pw-elastic --from-literal password=<password>
+```
+
+Create Kibana configmap, service and deployment
+
+```
+kubectl create -f kibana/kibana_configmap.yaml
+kubectl create -f kibana/kibana_svc.yaml
+kubectl create -f kibana/kibana_deployment.yaml
+```
+
+Wait for the deployment status using
+
+```
+kubectl rollout status deployment/kibana
+```
+
+This will create a Kibana web console which can be accessed using username _elastic_ and password as specified in the interactive authentication setup
+
+Once we have deployed elasticsearch and kibana, we can access it via kibana web console. We can check for the running logging agents in Index Management section
+
+### Generating Data for Testing
+
+[Partner Integration Test Framework](https://github.com/jfrog/partner-integration-tests) can be used to generate data for metrics.
 
 ## References
 
