@@ -297,7 +297,7 @@ Once the kibana is up, the host and port should be configured in fluent.conf and
 
 Creat an index pattern in the Management section and access the logs on the discover tab
 
-To access already existing visualizations and filters, import [export.ndjson](https://github.com/jfrog/log-analytics/blob/master/elastic-fluentd-kibana/export.ndjson) to Saved objects in Management section
+To access already existing visualizations and filters, import [export.ndjson](https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/kibana/export.ndjson) to Saved objects in Management section
 
 ### Dashboards
 
