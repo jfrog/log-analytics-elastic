@@ -1,0 +1,198 @@
+global:
+  elastic:
+    host: elasticsearch
+    port: 9200
+    user: elastic
+    password: password
+    scheme: http
+    ssl_verify: false
+  jfrog:
+    observability:
+      metrics:
+        jpd_url: http://localhost:8082
+        jpd_url_nginx: http://jfrog-platform-artifactory-nginx
+        username: jfrog_user
+        apikey: jfrog_api_key
+        token: jfrog_token
+      branch: master
+
+installerInfo: '{ "productId": "Helm_elastic_artifactory/{{ .Chart.Version }}", "features": [ { "featureId": "ArtifactoryVersion/{{ default .Chart.AppVersion .Values.artifactory.image.version }}" }, { "featureId": "{{ if .Values.postgresql.enabled }}postgresql{{ else }}{{ .Values.database.type }}{{ end }}/0.0.0" }, { "featureId": "Platform/{{ default "kubernetes" .Values.installer.platform }}" },  { "featureId": "Channel/Helm_elastic_artifactory" } ] }'
+artifactory:
+  artifactory:
+    openMetrics:
+      enabled: true
+    customSidecarContainers: |
+      - name: "artifactory-fluentd-sidecar"
+        image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
+        imagePullPolicy: "IfNotPresent"
+        command:
+          - 'sh'
+          - '-c'
+          - >
+            curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/{{ .Values.global.jfrog.observability.branch }}/fluent.conf.rt -o fluentd.conf;
+            fluentd -v -c fluentd.conf
+        volumeMounts:
+          - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
+            name: artifactory-volume
+        env:
+          - name: JF_PRODUCT_DATA_INTERNAL
+            value: {{ .Values.artifactory.persistence.mountPath }}
+          - name: JF_JPD_URL
+            value: "{{ .Values.global.jfrog.observability.metrics.jpd_url }}"
+          - name: JF_JPD_USER_NAME
+            value: "{{ .Values.global.jfrog.observability.metrics.username }}"
+          - name: JF_JPD_API_KEY
+            value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+          - name: JF_JPD_TOKEN
+            value: "{{ .Values.global.jfrog.observability.metrics.token }}"
+          - name: ELASTIC_HOST
+            value: "{{ .Values.global.elastic.host }}"
+          - name: ELASTIC_PORT
+            value: "{{ .Values.global.elastic.port }}"
+          - name: ELASTIC_USER
+            value: "{{ .Values.global.elastic.user }}"
+          - name: ELASTIC_PASSWORD
+            value: "{{ .Values.global.elastic.password }}"
+          - name: ELASTIC_SCHEME
+            value: "{{ .Values.global.elastic.scheme }}"
+          - name: ELASTIC_SSL_VERIFY
+            value: "{{ .Values.global.elastic.ssl_verify }}"
+
+xray:
+  enabled: true
+  common:
+    customSidecarContainers: |
+      - name: "xray-fluentd-sidecar"
+        image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
+        imagePullPolicy: "IfNotPresent"
+        command:
+          - 'sh'
+          - '-c'
+          - >
+            curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/{{ .Values.global.jfrog.observability.branch }}/fluent.conf.xray -o fluentd.conf;
+            fluentd -v -c fluentd.conf
+        volumeMounts:
+          - mountPath: "{{ .Values.xray.persistence.mountPath }}"
+            name: data-volume
+        env:
+          - name: JF_PRODUCT_DATA_INTERNAL
+            value: {{ .Values.xray.persistence.mountPath }}
+          - name: JF_JPD_URL
+            value: "{{ .Values.global.jfrog.observability.metrics.jpd_url }}"
+          - name: JF_JPD_USER_NAME
+            value: "{{ .Values.global.jfrog.observability.metrics.username }}"
+          - name: JF_JPD_API_KEY
+            value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+          - name: JF_JPD_TOKEN
+            value: "{{ .Values.global.jfrog.observability.metrics.token }}"
+          - name: ELASTIC_HOST
+            value: "{{ .Values.global.elastic.host }}"
+          - name: ELASTIC_PORT
+            value: "{{ .Values.global.elastic.port }}"
+          - name: ELASTIC_USER
+            value: "{{ .Values.global.elastic.user }}"
+          - name: ELASTIC_PASSWORD
+            value: "{{ .Values.global.elastic.password }}"
+          - name: ELASTIC_SCHEME
+            value: "{{ .Values.global.elastic.scheme }}"
+          - name: ELASTIC_SSL_VERIFY
+            value: "{{ .Values.global.elastic.ssl_verify }}"
+
+  additionalResources: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: {{ template "xray.fullname" . }}-fluentd-state
+      labels:
+        app: {{ template "xray.name" . }}
+        chart: {{ template "xray.chart" . }}
+        component: metrics
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        {{- with .Values.xray.labels }}
+    {{ toYaml . | indent 4 }}
+        {{- end }}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: {{ template "xray.fullname" . }}-fluentd-siem
+      labels:
+        app: {{ template "xray.name" . }}
+        chart: {{ template "xray.chart" . }}
+        component: metrics
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        {{- with .Values.xray.labels }}
+    {{ toYaml . | indent 4 }}
+        {{- end }}
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: {{ template "xray.name" . }}
+          release: {{ .Release.Name }}
+          component: {{ .Values.xray.name }}
+      template:
+        metadata:
+          labels:
+            app: {{ template "xray.name" . }}
+            release: {{ .Release.Name }}
+            component: {{ .Values.xray.name }}
+        spec:
+          containers:
+            - name: jfrog-siem-fluentd
+              image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
+              imagePullPolicy: "IfNotPresent"
+              command:
+                - "sh"
+                - "-c"
+                - >
+                  curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/{{ .Values.global.jfrog.observability.branch }}/fluent.conf.siem -o fluentd.conf;
+                  fluentd -v -c fluentd.conf
+              volumeMounts:
+                - mountPath: "/usr/local/jfrog-fluentd"
+                  name: jfrog-siem-fluentd-state
+              env:
+                - name: JF_JPD_URL
+                  value: "{{ .Values.global.jfrog.observability.metrics.jpd_url_nginx }}"
+                - name: JF_JPD_USER_NAME
+                  value: "{{ .Values.global.jfrog.observability.metrics.username }}"
+                - name: JF_JPD_API_KEY
+                  value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+                - name: JF_JPD_TOKEN
+                  value: "{{ .Values.global.jfrog.observability.metrics.token }}"
+                - name: ELASTIC_HOST
+                  value: "{{ .Values.global.elastic.host }}"
+                - name: ELASTIC_PORT
+                  value: "{{ .Values.global.elastic.port }}"
+                - name: ELASTIC_USER
+                  value: "{{ .Values.global.elastic.user }}"
+                - name: ELASTIC_PASSWORD
+                  value: "{{ .Values.global.elastic.password }}"
+                - name: ELASTIC_SCHEME
+                  value: "{{ .Values.global.elastic.scheme }}"
+                - name: ELASTIC_SSL_VERIFY
+                  value: "{{ .Values.global.elastic.ssl_verify }}"
+                - name: JF_STATE_FOLDER
+                  value: "/usr/local/jfrog-fluentd"
+          volumes:
+            - name: jfrog-siem-fluentd-state
+              persistentVolumeClaim:
+                claimName: {{ template "xray.fullname" . }}-fluentd-state
+insight:
+  enabled: false
+distribution:
+  enabled: false
+pipelines:
+  enabled: false
+rabbitmq:
+  enabled: true
+redis:
+  enabled: false

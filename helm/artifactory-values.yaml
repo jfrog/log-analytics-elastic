@@ -1,50 +1,55 @@
+global:
+  elastic:
+    host: elasticsearch
+    port: 9200
+    user: elastic
+    password: password
+    scheme: http
+    ssl_verify: false
+  jfrog:
+    observability:
+      metrics:
+        jpd_url: http://localhost:8082
+        jpd_url_nginx: http://jfrog-platform-artifactory-nginx
+        username: jfrog_user
+        apikey: jfrog_api_key
+        token: jfrog_token
+      branch: master
 installerInfo: '{ "productId": "Helm_elastic_artifactory/{{ .Chart.Version }}", "features": [ { "featureId": "ArtifactoryVersion/{{ default .Chart.AppVersion .Values.artifactory.image.version }}" }, { "featureId": "{{ if .Values.postgresql.enabled }}postgresql{{ else }}{{ .Values.database.type }}{{ end }}/0.0.0" }, { "featureId": "Platform/{{ default "kubernetes" .Values.installer.platform }}" },  { "featureId": "Channel/Helm_elastic_artifactory" } ] }'
 artifactory:
-  customInitContainersBegin: |
-    - name: "download-fluentd-conf-on-persistent-volume"
-      image: "{{ .Values.initContainerImage }}"
-      imagePullPolicy: "{{ .Values.artifactory.image.pullPolicy }}"
-      command:
-        - 'sh'
-        - '-c'
-        - >
-          mkdir -p {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/;
-          wget https://raw.githubusercontent.com/jfrog/log-analytics-elastic/master/fluent.conf.rt -O {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
-      volumeMounts:
-        - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
-          name: artifactory-volume
-    - name: "prepare-fluentd-conf-on-persistent-volume"
-      image: "{{ .Values.initContainerImage }}"
-      imagePullPolicy: "{{ .Values.artifactory.image.pullPolicy }}"
-      command:
-        - 'sh'
-        - '-c'
-        - >
-          sed 's/my_host/{{ .Values.elastic.host }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf > {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new;
-          mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
-          sed 's/9200/{{ .Values.elastic.port }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf > {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new;
-          mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
-          sed 's/my_user/{{ .Values.elastic.user }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf > {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new;
-          mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
-          sed 's/my_password/{{ .Values.elastic.password }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf > {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new;
-          mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf.new {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
-      volumeMounts:
-        - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
-          name: artifactory-volume
   customSidecarContainers: |
     - name: "artifactory-fluentd-sidecar"
-      image: "releases-docker.jfrog.io/reg2/fluentd-1.12.0"
+      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
       imagePullPolicy: "IfNotPresent"
+      command:
+        - 'sh'
+        - '-c'
+        - >
+          curl https://raw.githubusercontent.com/jfrog/log-analytics-elastic/{{ .Values.global.jfrog.observability.branch }}/fluent.conf.rt -o fluentd.conf;
+          fluentd -v -c fluentd.conf
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
           name: artifactory-volume
       env:
         - name: JF_PRODUCT_DATA_INTERNAL
           value: {{ .Values.artifactory.persistence.mountPath }}
-        - name: FLUENTD_CONF
-          value: ../../../../{{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
-elastic:
-  host: elasticsearch
-  port: 9200
-  user: elastic
-  password: password
+        - name: JF_JPD_URL
+          value: "{{ .Values.global.jfrog.observability.metrics.jpd_url }}"
+        - name: JF_JPD_USER_NAME
+          value: "{{ .Values.global.jfrog.observability.metrics.username }}"
+        - name: JF_JPD_API_KEY
+          value: "{{ .Values.global.jfrog.observability.metrics.apikey }}"
+        - name: JF_JPD_TOKEN
+          value: "{{ .Values.global.jfrog.observability.metrics.token }}"
+        - name: ELASTIC_HOST
+          value: "{{ .Values.global.elastic.host }}"
+        - name: ELASTIC_PORT
+          value: "{{ .Values.global.elastic.port }}"
+        - name: ELASTIC_USER
+          value: "{{ .Values.global.elastic.user }}"
+        - name: ELASTIC_PASSWORD
+          value: "{{ .Values.global.elastic.password }}"
+        - name: ELASTIC_SCHEME
+          value: "{{ .Values.global.elastic.scheme }}"
+        - name: ELASTIC_SSL_VERIFY
+          value: "{{ .Values.global.elastic.ssl_verify }}"

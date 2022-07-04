@@ -77,7 +77,7 @@
   tag jfrog.xray.xray.request
   <parse>
     @type regexp
-    expression ^(?<timestamp>[^ ]*)\|(?<trace_id>[^ ]*)\|(?<remote_address>.+)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>.*)$
+    expression ^(?<timestamp>[^|]*)\|(?<trace_id>[^|]*)\|(?<remote_address>[^|]++)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.*)$
   </parse>
 </source>
 # STRIP COLOR CODES FROM SERVICE LOGS
@@ -106,16 +106,55 @@
   </record>
 </filter>
 
+###JFROG METRICS Plugin
+<source>
+  @type jfrog_metrics
+  @id metrics_http_jfrt
+  tag jfrog.metrics.xray
+  interval 5s
+  metric_prefix 'jfrog.xray'
+  jpd_url "#{ENV['JF_JPD_URL']}"
+  username "#{ENV['JF_JPD_USER_NAME']}"
+  apikey "#{ENV['JF_JPD_API_KEY']}"
+  token "#{ENV['JF_JPD_TOKEN']}"
+  target_platform "ELASTIC"
+</source>
+
+
 ########################
-# ELASTIC OUTPUT
+# ELASTIC OUTPUT METRICS
+########################
+<match jfrog.metrics.**>
+  @type elasticsearch
+  @id elasticsearch_metrics
+  host "#{ENV['ELASTIC_HOST']}"
+  port "#{ENV['ELASTIC_PORT']}"
+  user "#{ENV['ELASTIC_USER']}"
+  password "#{ENV['ELASTIC_PASSWORD']}"
+  scheme "#{ENV['ELASTIC_SCHEME']}"
+  ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
+  index_name unified-metrics-xray
+  include_tag_key true
+  type_name fluentd
+  logstash_format false
+  include_timestamp true
+</match>
+#END ELASTIC OUTPUT
+
+
+
+########################
+# ELASTIC OUTPUT LOGS
 ########################
 <match jfrog.**>
   @type elasticsearch
   @id elasticsearch
-  host my_host
-  port 9200
-  user my_user
-  password my_password
+  host "#{ENV['ELASTIC_HOST']}"
+  port "#{ENV['ELASTIC_PORT']}"
+  user "#{ENV['ELASTIC_USER']}"
+  password "#{ENV['ELASTIC_PASSWORD']}"
+  scheme "#{ENV['ELASTIC_SCHEME']}"
+  ssl_verify "#{ENV['ELASTIC_SSL_VERIFY']}"
   index_name unified-xray
   include_tag_key true
   type_name fluentd
