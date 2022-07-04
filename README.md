@@ -2,18 +2,6 @@
 
 The following describes how to configure Elastic and Kibana to gather metrics from Artifactory and Xray through the use of FluentD.
 
-| version | artifactory | xray   | distribution | mission_control | pipelines |
-| ------- | ----------- | ------ | ------------ | --------------- | --------- |
-| 0.9.0   | 7.12.6      | 3.15.3 | 2.6.0        | 4.6.2           | 1.10.0    |
-| 0.8.0   | 7.10.5      | 3.8.6  | 2.4.2        | 4.5.0           | 1.7.2     |
-| 0.7.0   | 7.7.8       | 3.8.6  | 2.4.2        | 4.5.0           | 1.7.2     |
-| 0.6.0   | 7.7.8       | 3.8.6  | 2.4.2        | 4.5.0           | 1.7.2     |
-| 0.5.0   | 7.7.3       | 3.8.0  | 2.4.2        | 4.5.0           | 1.7.2     |
-| 0.4.0   | 7.7.3       | 3.8.0  | 2.4.2        | 4.5.0           | N/A       |
-| 0.3.0   | 7.7.3       | 3.8.0  | 2.4.2        | N/A             | N/A       |
-| 0.2.0   | 7.7.3       | 3.8.0  | N/A          | N/A             | N/A       |
-| 0.1.1   | 7.6.3       | 3.6.2  | N/A          | N/A             | N/A       |
-
 1. [Elastic Setup](#elastic-setup)
 2. [Environment Configuration](#environment-configuration)
 3. [Fluentd Installation](#fluentd-installation)
@@ -27,13 +15,7 @@ The following describes how to configure Elastic and Kibana to gather metrics fr
 
 ## Elastic Setup
 
-Install the `JFrog Platform` integration
-
-```text
-1. In Kibana, go to Management > Integrations > Browse integrations. Search for "JFrog Platform" and select an integration
-2. Click the Settings tab.
-3. Click Install <integration> assets to set up the Kibana and Elasticsearch assets.
-```
+Install the `JFrog Platform` Dashboards
 
 Installing all kibana assests directly instead of integration.
 To access already existing visualizations and filters, import [kibana_dashboard_v1.ndjson](https://github.com/jfrog/log-analytics-elastic/blob/master/kibana/kibana_dashboard_v1.ndjson) to Saved objects in Management section
