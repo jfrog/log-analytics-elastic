@@ -1,5 +1,5 @@
 > [!WARNING]
-> The integration will reach End of Support on October 31, 2023. After that date, this repository will no longer receive updates from JFrog and will no longer be supported by JFrog
+> The integration will reach End of Support on October 31, 2023. After that date, this repository will no longer be supported by JFrog and receive no updates.
 
 # Artifactory and Xray Logging Analytics with FluentD, ElasticSearch and Kibana
 
