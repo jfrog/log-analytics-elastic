@@ -1,3 +1,6 @@
+> [!WARNING]
+> The integration will reach End of Support on October 31, 2023. After that date, this repository will no longer be supported by JFrog and receive no updates.
+
 # Artifactory and Xray Logging Analytics with FluentD, ElasticSearch and Kibana
 
 The following describes how to configure Elastic and Kibana to gather metrics from Artifactory and Xray through the use of FluentD.
